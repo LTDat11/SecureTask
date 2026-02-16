@@ -1,6 +1,5 @@
 # SecureTaskApi
-
-ASP.NET Core Web API (.NET 8) with PostgreSQL using Entity Framework Core.
+ASP.NET Core Web API (.NET 8) with PostgreSQL using Entity Framework Core and JWT Authentication.
 
 ---
 
@@ -42,12 +41,43 @@ Compose V1.
 ```bash
 docker-compose up -d
 ```
-Compose V2.
+
+## Environment Configuration (IMPORTANT)
+This project uses environment variables for security.
+
+Generate JWT Secret Key
 
 ```bash
-docker compose up -d
+openssl rand -base64 32
 ```
-Run Database Migration:
+
+Create .env file (root project)
+DO NOT commit this file.
+
+Create .env:
+```
+JWT_KEY=YOUR_GENERATED_SECRET
+JWT_ISSUER=SecureTaskApi
+JWT_AUDIENCE=SecureTaskApiUser
+DATABASE_URL="Host=localhost;Port=5432;Database=securetaskdb;Username=postgres;Password=YourPassWord"
+```
+
+Load ENV into shell (macOS / Linux)
+Before running the app:
+
+```bash
+set -a
+source .env
+set +a
+```
+
+Verify:
+
+```bash
+echo $DATABASE_URL
+```
+
+## Run Database Migration:
 
 ```bash
 dotnet ef migrations add InitialCreate
@@ -65,7 +95,7 @@ Swagger UI:
 https://localhost:7125/swagger
 ```
 
-Verify Database
+## Verify Database
 Access PostgreSQL inside container:
 
 ```bash
@@ -83,23 +113,6 @@ Stop PostgreSQL:
 docker stop securetask-postgres
 ```
 
-## Setup ENV
 
-Generate JWT Secret Key:
-```bash
-openssl rand -base64 32
-```
-
-Copy output and past to .env
-
-Create .env file in root project following below format
-
-```
-export JWT_KEY=YOUR_GENERATED_SECRET
-export JWT_ISSUER=SecureTaskApi
-export JWT_AUDIENCE=SecureTaskApiUser
-
-export DATABASE_URL=Host=localhost;Port=5432;Database=securetaskdb;Username=postgres;Password=YourPassWord
-```
 
 
