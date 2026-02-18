@@ -41,6 +41,30 @@ public class TasksController : ControllerBase
         return Ok(tasks);
     }
 
+    // GET: api/tasks/{id}
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetTask(Guid id)
+    {
+        var username = User.FindFirstValue(ClaimTypes.Name);
+
+        var task = await _context.TaskItems
+            .Where(t => t.Id == id && t.User.UserName == username)
+            .Select(task => new TaskResponseDto
+            {
+                Id = task.Id,
+                Title = task.Title,
+                Status = task.Status.ToString(),
+                Description = task.Description,
+                Deadline = task.Deadline
+            })
+            .FirstOrDefaultAsync();
+
+        if (task == null)
+            return NotFound();
+
+        return Ok(task);
+    }
+
     // POST: api/tasks
     [HttpPost]
     public async Task<IActionResult> CreateTask(CreateTaskDto dto)
