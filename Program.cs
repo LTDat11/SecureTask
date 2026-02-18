@@ -49,6 +49,22 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = audience,
         IssuerSigningKey = new SymmetricSecurityKey(key)
     };
+
+    // Optional: Add events for responding to authentication failures, token validation, etc.
+    options.Events = new JwtBearerEvents
+    {
+        OnChallenge = context =>
+        {
+            // Skip the default logic.
+            context.HandleResponse();
+
+            // Return a custom response for unauthorized requests.
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            context.Response.ContentType = "application/json";
+            var result = System.Text.Json.JsonSerializer.Serialize(new { error = "unauthorized", message = "Access token is missing or invalid" });
+            return context.Response.WriteAsync(result);
+        }
+    };
 });
 
 // Swagger JWT support
