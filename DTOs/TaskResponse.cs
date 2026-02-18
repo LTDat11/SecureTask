@@ -1,6 +1,6 @@
 namespace SecureTaskApi.DTOs;
 
-public class TaskResponseDto
+public class TaskResponse
 {
     public Guid Id { get; set; }
     public string Title { get; set; } = null!;
