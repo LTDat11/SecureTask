@@ -1,6 +1,6 @@
 namespace SecureTaskApi.DTOs;
 
-public class CreateTaskDto
+public class CreateTaskRequest
 {
     public string Title { get; set; } = null!;
     public string? Description { get; set; }

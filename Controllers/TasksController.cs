@@ -28,7 +28,7 @@ public class TasksController : ControllerBase
 
         var tasks = await _context.TaskItems
             .Where(t => t.User.UserName == username)
-            .Select(t => new TaskResponseDto
+            .Select(t => new TaskResponse
             {
                 Id = t.Id,
                 Title = t.Title,
@@ -49,7 +49,7 @@ public class TasksController : ControllerBase
 
         var task = await _context.TaskItems
             .Where(t => t.Id == id && t.User.UserName == username)
-            .Select(task => new TaskResponseDto
+            .Select(task => new TaskResponse
             {
                 Id = task.Id,
                 Title = task.Title,
@@ -75,7 +75,7 @@ public class TasksController : ControllerBase
 
         var tasks = await _context.TaskItems
             .Where(t => t.User.UserName == username && t.Status == taskStatus)
-            .Select(t => new TaskResponseDto
+            .Select(t => new TaskResponse
             {
                 Id = t.Id,
                 Title = t.Title,
@@ -90,7 +90,7 @@ public class TasksController : ControllerBase
 
     // POST: api/tasks
     [HttpPost]
-    public async Task<IActionResult> CreateTask(CreateTaskDto dto)
+    public async Task<IActionResult> CreateTask(CreateTaskRequest dto)
     {
         var username = User.FindFirstValue(ClaimTypes.Name);
 
@@ -111,7 +111,7 @@ public class TasksController : ControllerBase
         _context.TaskItems.Add(task);
         await _context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetMyTasks), new { id = task.Id }, new TaskResponseDto
+        return CreatedAtAction(nameof(GetMyTasks), new { id = task.Id }, new TaskResponse
         {
             Id = task.Id,
             Title = task.Title,
