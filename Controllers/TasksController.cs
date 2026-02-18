@@ -65,6 +65,29 @@ public class TasksController : ControllerBase
         return Ok(task);
     }
 
+    // GET: api/tasks/status/{status}
+    [HttpGet("status/{status}")]
+    public async Task<IActionResult> GetTasksByStatus(string status)
+    {
+        var username = User.FindFirstValue(ClaimTypes.Name);
+        if (!Enum.TryParse<Entities.TaskStatus>(status, true, out var taskStatus))
+            return BadRequest("Invalid status");
+
+        var tasks = await _context.TaskItems
+            .Where(t => t.User.UserName == username && t.Status == taskStatus)
+            .Select(t => new TaskResponseDto
+            {
+                Id = t.Id,
+                Title = t.Title,
+                Status = t.Status.ToString(),
+                Description = t.Description,
+                Deadline = t.Deadline
+            })
+            .ToListAsync();
+
+        return Ok(tasks);
+    }
+
     // POST: api/tasks
     [HttpPost]
     public async Task<IActionResult> CreateTask(CreateTaskDto dto)
