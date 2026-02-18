@@ -24,10 +24,10 @@ public class TasksController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetMyTasks()
     {
-        var username = User.FindFirstValue(ClaimTypes.Name);
+        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
         var tasks = await _context.TaskItems
-            .Where(t => t.User.UserName == username)
+            .Where(t => t.UserId == userId)
             .Select(t => new TaskResponse
             {
                 Id = t.Id,
@@ -45,10 +45,10 @@ public class TasksController : ControllerBase
     [HttpGet("{id}")]
     public async Task<IActionResult> GetTask(Guid id)
     {
-        var username = User.FindFirstValue(ClaimTypes.Name);
+        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
         var task = await _context.TaskItems
-            .Where(t => t.Id == id && t.User.UserName == username)
+            .Where(t => t.Id == id && t.UserId == userId)
             .Select(task => new TaskResponse
             {
                 Id = task.Id,
@@ -69,12 +69,69 @@ public class TasksController : ControllerBase
     [HttpGet("status/{status}")]
     public async Task<IActionResult> GetTasksByStatus(string status)
     {
-        var username = User.FindFirstValue(ClaimTypes.Name);
+        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
         if (!Enum.TryParse<Entities.TaskStatus>(status, true, out var taskStatus))
             return BadRequest("Invalid status");
 
         var tasks = await _context.TaskItems
-            .Where(t => t.User.UserName == username && t.Status == taskStatus)
+            .Where(t => t.UserId == userId && t.Status == taskStatus)
+            .Select(t => new TaskResponse
+            {
+                Id = t.Id,
+                Title = t.Title,
+                Status = t.Status.ToString(),
+                Description = t.Description,
+                Deadline = t.Deadline
+            })
+            .ToListAsync();
+
+        return Ok(tasks);
+    }
+
+    // GET: api/tasks?dateline=2026-01-01&sortBy=Date&sortOrder=asc
+    [HttpGet("sort")]
+    public async Task<IActionResult> GetSortedTasks(DateTime? deadline, string? sortBy, string? sortOrder = "asc")
+    {
+        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+        var tasksQuery = _context.TaskItems
+            .Where(t => t.UserId == userId);
+
+        // Filter by deadline (date without time component)
+        if (deadline.HasValue)
+        {
+            var date = DateTime.SpecifyKind(deadline.Value.Date, DateTimeKind.Utc);
+            var nextDate = date.AddDays(1);
+
+            tasksQuery = tasksQuery.Where(t =>
+                t.Deadline.HasValue &&
+                t.Deadline.Value >= date &&
+                t.Deadline.Value < nextDate);
+        }
+
+        // sanitze input
+        sortBy = sortBy?.ToLower();
+        sortOrder = sortOrder?.ToLower() ?? "asc";
+
+        // Sorting
+        tasksQuery = sortBy switch
+        {
+            "date" => sortOrder == "desc"
+            ? tasksQuery.OrderByDescending(t => t.Deadline)
+            : tasksQuery.OrderBy(t => t.Deadline),
+
+            "status" => sortOrder == "desc"
+                ? tasksQuery.OrderByDescending(t => t.Status)
+                : tasksQuery.OrderBy(t => t.Status),
+
+            "title" => sortOrder == "desc"
+                ? tasksQuery.OrderByDescending(t => t.Title)
+                : tasksQuery.OrderBy(t => t.Title),
+
+            _ => tasksQuery.OrderBy(t => t.Title)
+        };
+
+        var tasks = await tasksQuery
             .Select(t => new TaskResponse
             {
                 Id = t.Id,
@@ -92,10 +149,10 @@ public class TasksController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateTask(CreateTaskRequest dto)
     {
-        var username = User.FindFirstValue(ClaimTypes.Name);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
         var user = await _context.Users
-            .FirstOrDefaultAsync(u => u.UserName == username);
+            .FirstOrDefaultAsync(u => u.Id.ToString() == userId);
 
         if (user == null)
             return NotFound();
@@ -104,7 +161,7 @@ public class TasksController : ControllerBase
         {
             Title = dto.Title,
             Description = dto.Description,
-            Deadline = dto.Deadline,
+            Deadline = dto.Deadline?.ToUniversalTime(),
             UserId = user.Id
         };
 
