@@ -67,14 +67,12 @@ public class TasksController : ControllerBase
 
     // GET: api/tasks/status/{status}
     [HttpGet("status/{status}")]
-    public async Task<IActionResult> GetTasksByStatus(string status)
+    public async Task<IActionResult> GetTasksByStatus(Entities.TaskStatus status)
     {
         var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        if (!Enum.TryParse<Entities.TaskStatus>(status, true, out var taskStatus))
-            return BadRequest("Invalid status");
 
         var tasks = await _context.TaskItems
-            .Where(t => t.UserId == userId && t.Status == taskStatus)
+            .Where(t => t.UserId == userId && t.Status == status)
             .Select(t => new TaskResponse
             {
                 Id = t.Id,
@@ -88,48 +86,59 @@ public class TasksController : ControllerBase
         return Ok(tasks);
     }
 
-    // GET: api/tasks?dateline=2026-01-01&sortBy=Date&sortOrder=asc
+    // GET: api/tasks/sort?title=abc&status=Todo&deadline=2024-06-30&sortBy=Deadline&sortOrder=desc&page=1&pageSize=10
     [HttpGet("sort")]
-    public async Task<IActionResult> GetSortedTasks(DateTime? deadline, string? sortBy, string? sortOrder = "asc")
+    public async Task<IActionResult> GetTasks([FromQuery] TaskQuery query)
     {
         var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
         var tasksQuery = _context.TaskItems
+            .AsNoTracking()
             .Where(t => t.UserId == userId);
 
-        // Filter by deadline (date without time component)
-        if (deadline.HasValue)
+        if (query.Deadline.HasValue)
         {
-            var date = DateTime.SpecifyKind(deadline.Value.Date, DateTimeKind.Utc);
+            var date = DateTime.SpecifyKind(query.Deadline.Value.Date, DateTimeKind.Utc);
             var nextDate = date.AddDays(1);
 
             tasksQuery = tasksQuery.Where(t =>
                 t.Deadline.HasValue &&
-                t.Deadline.Value >= date &&
-                t.Deadline.Value < nextDate);
+                t.Deadline >= date &&
+                t.Deadline < nextDate);
         }
 
-        // sanitze input
-        sortBy = sortBy?.ToLower();
-        sortOrder = sortOrder?.ToLower() ?? "asc";
+        if (!string.IsNullOrWhiteSpace(query.Title))
+            tasksQuery = tasksQuery
+                .Where(t => EF.Functions.ILike(t.Title, $"%{query.Title}%"));
 
-        // Sorting
-        tasksQuery = sortBy switch
+        if (!string.IsNullOrWhiteSpace(query.Description))
+            tasksQuery = tasksQuery
+                .Where(t => EF.Functions.ILike(t.Description!, $"%{query.Description}%"));
+
+        if (query.Status.HasValue)
+            tasksQuery = tasksQuery
+                .Where(t => t.Status == query.Status.Value);
+
+        var isDesc = query.SortOrder?.ToLower() == "desc";
+
+        tasksQuery = query.SortBy switch
         {
-            "date" => sortOrder == "desc"
-            ? tasksQuery.OrderByDescending(t => t.Deadline)
-            : tasksQuery.OrderBy(t => t.Deadline),
+            TaskSortBy.Deadline =>
+                isDesc ? tasksQuery.OrderByDescending(t => t.Deadline)
+                       : tasksQuery.OrderBy(t => t.Deadline),
 
-            "status" => sortOrder == "desc"
-                ? tasksQuery.OrderByDescending(t => t.Status)
-                : tasksQuery.OrderBy(t => t.Status),
+            TaskSortBy.Status =>
+                isDesc ? tasksQuery.OrderByDescending(t => t.Status)
+                       : tasksQuery.OrderBy(t => t.Status),
 
-            "title" => sortOrder == "desc"
-                ? tasksQuery.OrderByDescending(t => t.Title)
-                : tasksQuery.OrderBy(t => t.Title),
-
-            _ => tasksQuery.OrderBy(t => t.Title)
+            _ =>
+                isDesc ? tasksQuery.OrderByDescending(t => t.Title)
+                       : tasksQuery.OrderBy(t => t.Title)
         };
+
+        tasksQuery = tasksQuery
+            .Skip((query.Page - 1) * query.PageSize)
+            .Take(query.PageSize);
 
         var tasks = await tasksQuery
             .Select(t => new TaskResponse
