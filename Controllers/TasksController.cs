@@ -147,7 +147,7 @@ public class TasksController : ControllerBase
 
     // POST: api/tasks
     [HttpPost]
-    public async Task<IActionResult> CreateTask(CreateTaskRequest dto)
+    public async Task<IActionResult> CreateTask(CreateTaskRequest taskrequest)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -159,9 +159,9 @@ public class TasksController : ControllerBase
 
         var task = new TaskItem
         {
-            Title = dto.Title,
-            Description = dto.Description,
-            Deadline = dto.Deadline?.ToUniversalTime(),
+            Title = taskrequest.Title,
+            Description = taskrequest.Description,
+            Deadline = taskrequest.Deadline?.ToUniversalTime(),
             UserId = user.Id
         };
 
