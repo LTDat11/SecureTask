@@ -186,4 +186,27 @@ public class TasksController : ControllerBase
             Deadline = task.Deadline
         });
     }
+
+    // PUT: api/tasks/{id}
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateTask([FromRoute] Guid id, UpdateTaskRequest taskRequest)
+    {
+        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+        var task = await _context.TaskItems
+            .Include(t => t.User)
+            .FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId);
+
+        if (task == null)
+            return NotFound();
+
+        task.Title = taskRequest.Title;
+        task.Description = taskRequest.Description;
+        task.Deadline = taskRequest.Deadline.ToUniversalTime();
+        task.Status = (Entities.TaskStatus)taskRequest.Status;
+
+        await _context.SaveChangesAsync();
+
+        return NoContent();
+    }
 }
