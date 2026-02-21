@@ -209,4 +209,23 @@ public class TasksController : ControllerBase
 
         return NoContent();
     }
+
+    // DELETE: api/tasks/{id}
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteTask(Guid id)
+    {
+        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+        var task = await _context.TaskItems
+            .Include(t => t.User)
+            .FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId);
+
+        if (task == null)
+            return NotFound();
+
+        _context.TaskItems.Remove(task);
+        await _context.SaveChangesAsync();
+
+        return NoContent();
+    }
 }
