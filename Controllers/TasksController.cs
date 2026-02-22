@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using SecureTaskApi.Data;
 using SecureTaskApi.DTOs;
 using SecureTaskApi.Entities;
+using SecureTaskApi.Exceptions;
 using System.Linq.Expressions;
 using System.Security.Claims;
 
@@ -68,7 +69,7 @@ public class TasksController : ControllerBase
             .FirstOrDefaultAsync();
 
         if (task == null)
-            return NotFound();
+            throw new NotFoundException("Task not found");
 
         return Ok(task);
     }
@@ -213,7 +214,7 @@ public class TasksController : ControllerBase
             .FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId);
 
         if (task == null)
-            return NotFound();
+            throw new NotFoundException("Task not found");
 
         task.Title = taskRequest.Title;
         task.Description = taskRequest.Description;
@@ -235,7 +236,7 @@ public class TasksController : ControllerBase
             .FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId);
 
         if (task == null)
-            return NotFound();
+            throw new NotFoundException("Task not found");
 
         _context.TaskItems.Remove(task);
         await _context.SaveChangesAsync();
