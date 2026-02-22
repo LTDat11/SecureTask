@@ -8,6 +8,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using SecureTaskApi.Exceptions;
 
 
 namespace SecureTaskApi.Controllers;
@@ -30,7 +31,7 @@ public class AuthController : ControllerBase
             .AnyAsync(u => u.UserName == request.Username);
 
         if (exits)
-            return BadRequest("Username already exists");
+            throw new BadRequestException("Username already exists");
 
         var hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password);
 
@@ -53,12 +54,12 @@ public class AuthController : ControllerBase
             .FirstOrDefaultAsync(u => u.UserName == request.UserName);
 
         if (user == null)
-            return Unauthorized("Invalid username");
+            throw new NotFoundException("User not found");
 
         var isValidPassword = BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash);
 
         if (!isValidPassword)
-            return Unauthorized("Invalid password");
+            throw new BadRequestException("Invalid password");
 
         var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY")!;
         var issuer = Environment.GetEnvironmentVariable("JWT_ISSUER") ?? "SecureTaskApi";
