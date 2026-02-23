@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using SecureTaskApi.Middlewares;
+using SecureTaskApi.Services.Interfaces;
+using SecureTaskApi.Services.Implementations;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers().AddJsonOptions(options =>
@@ -100,6 +102,10 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 });
+
+// DI
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IJwtService, JwtService>();
 
 
 // Build after configuring services
