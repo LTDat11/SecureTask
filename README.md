@@ -1,6 +1,15 @@
 # SecureTaskApi
 ASP.NET Core Web API (.NET 8) with PostgreSQL using Entity Framework Core and JWT Authentication.
 
+This project demonstrates:
+
+- JWT Authentication
+- Layered Architecture (Controller → Service → Repository)
+- Entity Framework Core with PostgreSQL
+- Filtering, Sorting, Pagination
+- Custom Exception Handling
+- Clean separation of concerns
+
 ---
 
 ## 🚀 Tech Stack
@@ -10,6 +19,8 @@ ASP.NET Core Web API (.NET 8) with PostgreSQL using Entity Framework Core and JW
 - Entity Framework Core
 - PostgreSQL
 - Docker (Colima)
+- JWT Authentication
+- BCrypt
 
 ---
 
@@ -20,6 +31,69 @@ ASP.NET Core Web API (.NET 8) with PostgreSQL using Entity Framework Core and JW
 - Colima (for macOS)
 
 ---
+
+## Architecture
+
+The project follows a layered architecture:
+
+```
+Controllers
+    ↓
+Services (Business Logic)
+    ↓
+Repositories (Data Access)
+    ↓
+Entity Framework Core
+    ↓
+PostgreSQL
+```
+
+### Folder Structure
+
+```bash
+SecureTaskApi/
+│
+├── Controllers/
+├── Services/
+│   ├── Interfaces/
+│   └── Implementations/
+│
+├── Repositories/
+│   ├── Interfaces/
+│   └── Implementations/
+│
+├── DTOs/
+├── Entities/
+├── Data/
+├── Exceptions/
+└── Program.cs
+```
+---
+
+## Authentication
+
+Authentication is implemented using JWT (JSON Web Token).
+
+- Password hashing: BCrypt
+- Token generation: HMAC-SHA256
+- Claims: UserId, Username
+- Token expiration: 1 hour
+
+---
+
+## Features
+
+- User Registration
+- User Login
+- Task CRUD operations
+- Task filtering (title, status, deadline)
+- Sorting (Title, Deadline, Status)
+- Pagination
+- Authorization (users can access only their own tasks)
+- Global exception handling middleware
+
+---
+# How to Run
 
 ## 🐳 Start Docker (Colima)
 
