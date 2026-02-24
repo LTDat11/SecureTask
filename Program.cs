@@ -6,6 +6,8 @@ using System.Text;
 using SecureTaskApi.Middlewares;
 using SecureTaskApi.Services.Interfaces;
 using SecureTaskApi.Services.Implementations;
+using SecureTaskApi.Repositories.Interfaces;
+using SecureTaskApi.Repositories.Implementations;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers().AddJsonOptions(options =>
@@ -106,6 +108,9 @@ builder.Services.AddSwaggerGen(options =>
 // DI
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ITaskService, TaskService>();
+builder.Services.AddScoped<ITaskRepository, TaskRepository>();
 
 
 // Build after configuring services

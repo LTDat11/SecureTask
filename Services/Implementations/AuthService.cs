@@ -4,25 +4,25 @@ using SecureTaskApi.Data;
 using SecureTaskApi.DTOs;
 using SecureTaskApi.Entities;
 using SecureTaskApi.Exceptions;
+using SecureTaskApi.Repositories.Interfaces;
 using SecureTaskApi.Services.Interfaces;
 
 namespace SecureTaskApi.Services.Implementations;
 
 public class AuthService : IAuthService
 {
-    private readonly AppDbContext _context;
+    private readonly IUserRepository _userRepository;
     private readonly IJwtService _jwtService;
 
-    public AuthService(AppDbContext context, IJwtService jwtService)
+    public AuthService(IUserRepository userRepository, IJwtService jwtService)
     {
-        _context = context;
+        _userRepository = userRepository;
         _jwtService = jwtService;
     }
 
     public async Task<AuthResponse> RegisterAsync(RegisterRequest request)
     {
-        var exists = await _context.Users
-            .AnyAsync(u => u.UserName == request.Username);
+        var exists = await _userRepository.ExistsByUsernameAsync(request.Username);
 
         if (exists)
             throw new BadRequestException("Username already exists");
@@ -35,8 +35,8 @@ public class AuthService : IAuthService
             PasswordHash = hashedPassword
         };
 
-        _context.Users.Add(user);
-        await _context.SaveChangesAsync();
+        await _userRepository.AddAsync(user);
+        await _userRepository.SaveChangesAsync();
 
         return new AuthResponse
         {
@@ -46,8 +46,7 @@ public class AuthService : IAuthService
 
     public async Task<AuthResponse> LoginAsync(LoginRequest request)
     {
-        var user = await _context.Users
-            .FirstOrDefaultAsync(u => u.UserName == request.UserName);
+        var user = await _userRepository.GetByUsernameAsync(request.UserName);
 
         if (user == null)
             throw new NotFoundException("User not found");
