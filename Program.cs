@@ -9,6 +9,7 @@ using SecureTaskApi.Services.Implementations;
 using SecureTaskApi.Repositories.Interfaces;
 using SecureTaskApi.Repositories.Implementations;
 using Serilog;
+using Microsoft.AspNetCore.RateLimiting;
 
 // Configure Serilog for logging
 Log.Logger = new LoggerConfiguration()
@@ -26,6 +27,15 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 builder.Services.AddEndpointsApiExplorer(); // Add API explorer for Swagger
 builder.Services.AddSwaggerGen(); // Add Swagger for API documentation
 builder.Host.UseSerilog(); // Use Serilog for logging
+builder.Services.AddRateLimiter(optinons =>
+{
+    optinons.AddFixedWindowLimiter("LoginPoicy", opt =>
+    {
+        opt.Window = TimeSpan.FromMinutes(1);
+        opt.PermitLimit = 5;
+        opt.QueueLimit = 0;
+    });
+});
 
 // Load ENV
 var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY")
@@ -136,6 +146,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
+
+app.UseRateLimiter(); // Add rate limiting middleware
 
 app.UseHttpsRedirection();
 
