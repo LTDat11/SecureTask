@@ -8,6 +8,15 @@ using SecureTaskApi.Services.Interfaces;
 using SecureTaskApi.Services.Implementations;
 using SecureTaskApi.Repositories.Interfaces;
 using SecureTaskApi.Repositories.Implementations;
+using Serilog;
+using Microsoft.AspNetCore.RateLimiting;
+
+// Configure Serilog for logging
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .WriteTo.Console()
+    .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day)
+    .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers().AddJsonOptions(options =>
@@ -15,8 +24,18 @@ builder.Services.AddControllers().AddJsonOptions(options =>
     // Serialize enums as strings in JSON responses
     options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
 });
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddEndpointsApiExplorer(); // Add API explorer for Swagger
+builder.Services.AddSwaggerGen(); // Add Swagger for API documentation
+builder.Host.UseSerilog(); // Use Serilog for logging
+builder.Services.AddRateLimiter(optinons =>
+{
+    optinons.AddFixedWindowLimiter("LoginPoicy", opt =>
+    {
+        opt.Window = TimeSpan.FromMinutes(1);
+        opt.PermitLimit = 5;
+        opt.QueueLimit = 0;
+    });
+});
 
 // Load ENV
 var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY")
@@ -118,15 +137,23 @@ var app = builder.Build();
 
 // Middleware
 if (app.Environment.IsDevelopment())
+
+    app.UseSerilogRequestLogging(); // Add Serilog request logging middleware
+
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
+app.UseMiddleware<GlobalExceptionMiddleware>();
+
+app.UseRateLimiter(); // Add rate limiting middleware
+
 app.UseHttpsRedirection();
+
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseMiddleware<GlobalExceptionMiddleware>();
+
 app.MapControllers();
 app.Run();
 

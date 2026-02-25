@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SecureTaskApi.DTOs;
 using SecureTaskApi.Services.Interfaces;
+using Microsoft.AspNetCore.RateLimiting;
 
 
 namespace SecureTaskApi.Controllers;
@@ -23,6 +24,7 @@ public class AuthController : ControllerBase
         return Ok(result);
     }
 
+    [EnableRateLimiting("LoginPolicy")] // Apply rate limiting to the login endpoint
     [HttpPost("login")]
     public async Task<IActionResult> Login(LoginRequest request)
     {
