@@ -29,7 +29,7 @@ builder.Services.AddSwaggerGen(); // Add Swagger for API documentation
 builder.Host.UseSerilog(); // Use Serilog for logging
 builder.Services.AddRateLimiter(optinons =>
 {
-    optinons.AddFixedWindowLimiter("LoginPoicy", opt =>
+    optinons.AddFixedWindowLimiter("LoginPolicy", opt =>
     {
         opt.Window = TimeSpan.FromMinutes(1);
         opt.PermitLimit = 5;
