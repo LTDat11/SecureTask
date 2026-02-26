@@ -35,6 +35,20 @@ builder.Services.AddRateLimiter(optinons =>
         opt.PermitLimit = 5;
         opt.QueueLimit = 0;
     });
+
+    // Custom response for rate limit exceeded
+    optinons.OnRejected = async (context, cancellationToken) =>
+    {
+        context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+        context.HttpContext.Response.ContentType = "application/json";
+        var response = new
+        {
+            status = 429,
+            message = "Too many login attempts. Please try again later."
+        };
+
+        await context.HttpContext.Response.WriteAsJsonAsync(response, cancellationToken);
+    };
 });
 
 // Load ENV
