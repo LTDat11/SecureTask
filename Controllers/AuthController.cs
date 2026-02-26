@@ -24,7 +24,7 @@ public class AuthController : ControllerBase
         return Ok(result);
     }
 
-    [EnableRateLimiting("LoginPolicy")] // Apply rate limiting to the login endpoint
+    [EnableRateLimiting("LoginPoicy")] // Apply rate limiting to the login endpoint
     [HttpPost("login")]
     public async Task<IActionResult> Login(LoginRequest request)
     {
