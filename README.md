@@ -4,6 +4,7 @@ ASP.NET Core Web API (.NET 8) with PostgreSQL using Entity Framework Core and JW
 This project demonstrates:
 
 - JWT Authentication
+- Health Check
 - Layered Architecture (Controller → Service → Repository)
 - Entity Framework Core with PostgreSQL
 - Filtering, Sorting, Pagination
@@ -187,6 +188,12 @@ Stop PostgreSQL:
 docker stop securetask-postgres
 ```
 
+## Health Check
 
+Health checks for database connectivity
+
+```bash
+https://localhost:7125/health
+```
 
 
