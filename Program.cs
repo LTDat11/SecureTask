@@ -95,5 +95,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHealthChecks("/health"); // Add health check endpoint
 app.Run();
 
