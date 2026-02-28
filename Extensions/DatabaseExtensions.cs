@@ -14,6 +14,9 @@ public static class DatabaseExtensions
         services.AddDbContext<AppDbContext>(options =>
             options.UseNpgsql(connectionString));
 
+        services.AddHealthChecks()
+            .AddDbContextCheck<AppDbContext>();
+
         return services;
     }
 }
