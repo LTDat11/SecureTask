@@ -1,4 +1,18 @@
 services:
+  api:
+    build: .
+    container_name: securetask-api
+    ports:
+      - "5050:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      JWT_KEY: ${JWT_KEY}
+      JWT_ISSUER: ${JWT_ISSUER}
+      JWT_AUDIENCE: ${JWT_AUDIENCE}
+      DATABASE_URL: Host=db;Port=5432;Database=securetaskdb;Username=postgres;Password=123456
+    depends_on:
+      - db
+
   db:
     image: postgres:16
     container_name: securetask-postgres
