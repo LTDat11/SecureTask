@@ -120,21 +120,6 @@ DATABASE_URL=Host=db;Port=5432;Database=securetaskdb;Username=postgres;Password=
 ASPNETCORE_ENVIRONMENT=Development
 ```
 
-Load ENV into shell (macOS / Linux)
-Before running the app:
-
-```bash
-set -a
-source .env
-set +a
-```
-
-Verify:
-
-```bash
-echo $DATABASE_URL
-```
-
 ## Database Migration:
 
 ```bash
