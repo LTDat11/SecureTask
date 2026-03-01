@@ -22,7 +22,7 @@ This project demonstrates:
 - ASP.NET Core Web API
 - Entity Framework Core
 - PostgreSQL
-- Docker (Colima)
+- Docker
 - JWT Authentication
 - BCrypt
 
@@ -32,7 +32,7 @@ This project demonstrates:
 
 - .NET 8 SDK
 - Docker
-- Colima (for macOS)
+- C#
 
 ---
 
@@ -99,27 +99,6 @@ Authentication is implemented using JWT (JSON Web Token).
 ---
 # How to Run
 
-## 🐳 Start Docker (Colima)
-
-Start Colima:
-
-```bash
-colima start
-```
-
-Verify Docker is running:
-
-```bash
-docker ps
-```
-
-Run PostgreSQL Container:
-Compose V1.
-
-```bash
-docker-compose up -d
-```
-
 ## Environment Configuration (IMPORTANT)
 This project uses environment variables for security.
 
@@ -137,7 +116,8 @@ Create .env:
 JWT_KEY=YOUR_GENERATED_SECRET
 JWT_ISSUER=SecureTaskApi
 JWT_AUDIENCE=SecureTaskApiUser
-DATABASE_URL="Host=localhost;Port=5432;Database=securetaskdb;Username=postgres;Password=YourPassWord"
+DATABASE_URL=Host=db;Port=5432;Database=securetaskdb;Username=postgres;Password=YourPassWord
+ASPNETCORE_ENVIRONMENT=Development
 ```
 
 Load ENV into shell (macOS / Linux)
@@ -155,22 +135,31 @@ Verify:
 echo $DATABASE_URL
 ```
 
-## Run Database Migration:
+## Database Migration:
 
 ```bash
 dotnet ef migrations add InitialCreate
 dotnet ef database update
 ```
-Run Application:
+
+## 🐳 Run with Docker
+
+Verify Docker is running:
 
 ```bash
-dotnet run
+docker ps
+```
+
+Build - Run API and PostgreSQL Container:
+
+```bash
+docker-compose up --build -d
 ```
 
 Swagger UI:
 
 ```bash
-https://localhost:7125/swagger
+http://localhost:5050/swagger
 ```
 
 ## Verify Database
@@ -196,7 +185,7 @@ docker stop securetask-postgres
 Health checks for database connectivity
 
 ```bash
-https://localhost:7125/health
+http://localhost:5050/health
 ```
 
 

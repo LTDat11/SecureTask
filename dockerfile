@@ -9,10 +9,7 @@ RUN dotnet restore SecureTaskApi.csproj
 # Copy remaining source and publish
 COPY . ./
 RUN dotnet publish SecureTaskApi.csproj \
-    --configuration Release \
-    --no-restore \
-    --output /app/publish
-
+    -c Release -o /app/publish
 # ── Stage 2: Runtime ─────────────────────────────────────────────────────────────
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
