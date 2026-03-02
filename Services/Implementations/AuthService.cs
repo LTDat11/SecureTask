@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using SecureTaskApi.DTOs;
 using SecureTaskApi.Entities;
 using SecureTaskApi.Exceptions;
@@ -73,6 +74,9 @@ public class AuthService : IAuthService
 
         if (!isCurrentPasswordValid)
             throw new BadRequestException("Current password is incorrect");
+
+        if (request.NewPassword == request.CurrentPassword)
+            throw new BadRequestException("New password must be different from the current password");
 
         if (request.NewPassword != request.ConfirmNewPassword)
             throw new BadRequestException("New password and confirmation do not match");

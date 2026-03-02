@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using SecureTaskApi.DTOs;
 using SecureTaskApi.Services.Interfaces;
 using Microsoft.AspNetCore.RateLimiting;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace SecureTaskApi.Controllers;
@@ -15,6 +17,14 @@ public class AuthController : ControllerBase
     public AuthController(IAuthService authService)
     {
         _authService = authService;
+    }
+
+    // function to get user id from claims
+    private bool TryGetUserId(out Guid userId)
+    {
+        userId = Guid.Empty;
+        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        return !string.IsNullOrWhiteSpace(userIdClaim) && Guid.TryParse(userIdClaim, out userId);
     }
 
     [HttpPost("register")]
@@ -32,9 +42,16 @@ public class AuthController : ControllerBase
         return Ok(result);
     }
 
+    [Authorize]
     [HttpPost("change-password")]
-    public async Task<IActionResult> ChangePassword(Guid userId, ChangePasswordRequest request)
+    public async Task<IActionResult> ChangePassword(ChangePasswordRequest request)
     {
+        if (!User.Identity?.IsAuthenticated ?? true)
+            return Unauthorized(new { status = 401, message = "Missing or invalid token." });
+
+        if (!TryGetUserId(out var userId))
+            return Unauthorized(new { status = 401, message = "Invalid user claim in token." });
+
         await _authService.ChangePasswordAsync(userId, request);
         return Ok("Password changed successfully");
     }
