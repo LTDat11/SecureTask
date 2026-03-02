@@ -1,6 +1,4 @@
-using BCrypt.Net;
-using Microsoft.EntityFrameworkCore;
-using SecureTaskApi.Data;
+using System.Security.Claims;
 using SecureTaskApi.DTOs;
 using SecureTaskApi.Entities;
 using SecureTaskApi.Exceptions;
@@ -62,6 +60,33 @@ public class AuthService : IAuthService
         {
             UserName = user.UserName,
             Token = token
+        };
+    }
+
+    public async Task<ChangePasswordResponse> ChangePasswordAsync(Guid userId, ChangePasswordRequest request)
+    {
+        var user = await _userRepository.GetByIdAsync(userId);
+
+        if (user == null)
+            throw new NotFoundException("User not found");
+
+        var isCurrentPasswordValid = BCrypt.Net.BCrypt.Verify(request.CurrentPassword, user.PasswordHash);
+
+        if (!isCurrentPasswordValid)
+            throw new BadRequestException("Current password is incorrect");
+
+        if (request.NewPassword == request.CurrentPassword)
+            throw new BadRequestException("New password must be different from the current password");
+
+        if (request.NewPassword != request.ConfirmNewPassword)
+            throw new BadRequestException("New password and confirmation do not match");
+
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+        await _userRepository.SaveChangesAsync();
+
+        return new ChangePasswordResponse
+        {
+            Message = "Password changed successfully"
         };
     }
 }
