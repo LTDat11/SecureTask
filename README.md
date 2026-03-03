@@ -1,5 +1,5 @@
 # SecureTaskApi
-ASP.NET Core Web API (.NET 8) with PostgreSQL using Entity Framework Core, JWT Authentication and deploy with Render.
+ASP.NET Core Web API (.NET 8) with PostgreSQL using Entity Framework Core, JWT Authentication, deploy with Render and Claud AI to generate Tests .
 
 Link: https://securetaskapi.onrender.com
 
@@ -13,6 +13,7 @@ This project demonstrates:
 - Filtering, Sorting, Pagination
 - Custom Exception Handling
 - Clean separation of concerns
+- Xunit for test (generate by Claud)
 
 ---
 
