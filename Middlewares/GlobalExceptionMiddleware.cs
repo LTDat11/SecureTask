@@ -1,6 +1,6 @@
 using System.Net;
 using System.Text.Json;
-using Microsoft.AspNetCore.Http.HttpResults;
+using SecureTaskApi.DTOs;
 using SecureTaskApi.Exceptions;
 
 namespace SecureTaskApi.Middlewares;
@@ -25,11 +25,7 @@ public class GlobalExceptionMiddleware
             _logger.LogError(ex, "An unhandled exception occurred.");
         }
 
-        var response = new
-        {
-            status = (int)statusCode,
-            message = ex.Message
-        };
+        var response = ApiResponse<object>.Fail(ex.Message);
 
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = (int)statusCode;

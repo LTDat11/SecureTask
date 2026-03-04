@@ -27,24 +27,24 @@ public class TasksController : ControllerBase
     // GET: api/tasks
     [HttpGet]
     public async Task<IActionResult> GetMyTasks()
-        => Ok(await _service.GetMyTasksAsync(GetUserId()));
+        => Ok(ApiResponse<List<TaskResponse>>.Ok(await _service.GetMyTasksAsync(GetUserId())));
 
     // GET: api/tasks/{id}
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetMyTask(Guid id)
-        => Ok(await _service.GetByIdAsync(id, GetUserId()));
+        => Ok(ApiResponse<TaskResponse>.Ok(await _service.GetByIdAsync(id, GetUserId())));
 
     // GET: api/tasks/sort?title=abc&status=Todo&deadline=2024-06-30&sortBy=Deadline&sortOrder=desc&page=1&pageSize=10
     [HttpGet("sort")]
     public async Task<IActionResult> GetTasks([FromQuery] TaskQuery query)
-        => Ok(await _service.GetTasksAsync(query, GetUserId()));
+        => Ok(ApiResponse<PagedResponse<TaskResponse>>.Ok(await _service.GetTasksAsync(query, GetUserId())));
 
     // POST: api/tasks
     [HttpPost]
     public async Task<IActionResult> Create(CreateTaskRequest request)
     {
         var result = await _service.CreateAsync(request, GetUserId());
-        return CreatedAtAction(nameof(GetMyTask), new { id = result.Id }, result);
+        return CreatedAtAction(nameof(GetMyTask), new { id = result.Id }, ApiResponse<TaskResponse>.Ok(result));
     }
 
     // PUT: api/tasks/{id}
@@ -52,7 +52,7 @@ public class TasksController : ControllerBase
     public async Task<IActionResult> Update(Guid id, UpdateTaskRequest request)
     {
         await _service.UpdateAsync(id, request, GetUserId());
-        return NoContent();
+        return Ok(ApiResponse<object>.Ok(null));
     }
 
     // DELETE: api/tasks/{id}
@@ -60,6 +60,6 @@ public class TasksController : ControllerBase
     public async Task<IActionResult> Delete(Guid id)
     {
         await _service.DeleteAsync(id, GetUserId());
-        return NoContent();
+        return Ok(ApiResponse<object>.Ok(null));
     }
 }
