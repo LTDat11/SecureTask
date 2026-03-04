@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.RateLimiting;
+using SecureTaskApi.DTOs;
+
 namespace SecureTaskApi.Extensions;
 
 public static class RateLimitExtensions
@@ -19,11 +21,8 @@ public static class RateLimitExtensions
                 context.HttpContext.Response.StatusCode = 429;
                 context.HttpContext.Response.ContentType = "application/json";
 
-                await context.HttpContext.Response.WriteAsJsonAsync(new
-                {
-                    status = 429,
-                    message = "Too many login attempts."
-                }, token);
+                await context.HttpContext.Response.WriteAsJsonAsync(
+                    ApiResponse<object>.Fail("Too many login attempts."), token);
             };
         });
 

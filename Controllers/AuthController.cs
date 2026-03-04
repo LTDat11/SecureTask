@@ -31,7 +31,7 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Register(RegisterRequest request)
     {
         var result = await _authService.RegisterAsync(request);
-        return Ok(result);
+        return Ok(ApiResponse<AuthResponse>.Ok(result));
     }
 
     [EnableRateLimiting("LoginPolicy")] // Apply rate limiting to the login endpoint
@@ -39,7 +39,7 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Login(LoginRequest request)
     {
         var result = await _authService.LoginAsync(request);
-        return Ok(result);
+        return Ok(ApiResponse<AuthResponse>.Ok(result));
     }
 
     [Authorize]
@@ -47,12 +47,12 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> ChangePassword(ChangePasswordRequest request)
     {
         if (!User.Identity?.IsAuthenticated ?? true)
-            return Unauthorized(new { status = 401, message = "Missing or invalid token." });
+            return StatusCode(401, ApiResponse<object>.Fail("Missing or invalid token."));
 
         if (!TryGetUserId(out var userId))
-            return Unauthorized(new { status = 401, message = "Invalid user claim in token." });
+            return StatusCode(401, ApiResponse<object>.Fail("Invalid user claim in token."));
 
         await _authService.ChangePasswordAsync(userId, request);
-        return Ok("Password changed successfully");
+        return Ok(ApiResponse<string>.Ok("Password changed successfully"));
     }
 }
