@@ -10,7 +10,7 @@ public class User
     public string UserName { get; set; } = default!;
 
     [MaxLength(200)]
-    public string PasswordHash { set; get; } = default!;
+    public string PasswordHash { get; set; } = default!;
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
