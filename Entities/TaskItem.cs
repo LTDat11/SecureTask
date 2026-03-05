@@ -5,7 +5,7 @@ namespace SecureTaskApi.Entities;
 
 public class TaskItem
 {
-    public Guid Id { get; set; } = new Guid();
+    public Guid Id { get; set; } = Guid.NewGuid();
 
     [MaxLength(200)]
     public string Title { get; set; } = default!;
@@ -19,4 +19,8 @@ public class TaskItem
     public Guid UserId { get; set; }
 
     public User User { get; set; } = default!;
+
+    public DateTime CreatedAt { get; set; }
+
+    public DateTime? UpdatedAt { get; set; }
 }
