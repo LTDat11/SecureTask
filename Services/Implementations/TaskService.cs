@@ -93,13 +93,19 @@ public class TaskService : ITaskService
     }
 
     // function to get all tasks for a user
-    public async Task<List<TaskResponse>> GetMyTasksAsync(Guid userId)
+    public async Task<MyTaskResponse> GetMyTasksAsync(Guid userId)
     {
-        return await _taskRepository.Query()
+        var tasks = await _taskRepository.Query()
             .AsNoTracking()
             .Where(t => t.UserId == userId)
             .Select(MapToResponse())
             .ToListAsync();
+
+        return new MyTaskResponse
+        {
+            Items = tasks,
+            TotalItems = tasks.Count
+        };
     }
 
     // function to get paginated, filtered, and sorted list of tasks for a user

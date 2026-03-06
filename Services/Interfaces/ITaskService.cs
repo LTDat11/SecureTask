@@ -4,7 +4,7 @@ namespace SecureTaskApi.Services.Interfaces;
 
 public interface ITaskService
 {
-    Task<List<TaskResponse>> GetMyTasksAsync(Guid userId);
+    Task<MyTaskResponse> GetMyTasksAsync(Guid userId);
     Task<TaskResponse> GetByIdAsync(Guid id, Guid userId);
     Task<PagedResponse<TaskResponse>> GetTasksAsync(TaskQuery query, Guid userId);
     Task<TaskResponse> CreateAsync(CreateTaskRequest request, Guid userId);

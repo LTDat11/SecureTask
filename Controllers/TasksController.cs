@@ -27,7 +27,7 @@ public class TasksController : ControllerBase
     // GET: api/tasks
     [HttpGet]
     public async Task<IActionResult> GetMyTasks()
-        => Ok(ApiResponse<List<TaskResponse>>.Ok(await _service.GetMyTasksAsync(GetUserId())));
+        => Ok(ApiResponse<MyTaskResponse>.Ok(await _service.GetMyTasksAsync(GetUserId())));
 
     // GET: api/tasks/{id}
     [HttpGet("{id:guid}")]
