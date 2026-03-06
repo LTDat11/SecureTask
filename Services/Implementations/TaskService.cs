@@ -29,7 +29,9 @@ public class TaskService : ITaskService
             Title = t.Title,
             Description = t.Description,
             Status = t.Status.ToString(),
-            Deadline = t.Deadline
+            Deadline = t.Deadline,
+            CreatedAt = t.CreatedAt,
+            UpdatedAt = t.UpdatedAt
         };
     }
 
@@ -53,7 +55,9 @@ public class TaskService : ITaskService
             Title = task.Title,
             Description = task.Description,
             Status = task.Status.ToString(),
-            Deadline = task.Deadline
+            Deadline = task.Deadline,
+            CreatedAt = task.CreatedAt,
+            UpdatedAt = task.UpdatedAt
         };
     }
 
