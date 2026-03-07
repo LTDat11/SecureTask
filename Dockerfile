@@ -3,18 +3,18 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
 # Restore dependencies (cached layer when only csproj changes)
-COPY SecureTaskApi.csproj ./
-RUN dotnet restore SecureTaskApi.csproj
+COPY SecureTaskApi/SecureTaskApi.csproj SecureTaskApi/
+RUN dotnet restore SecureTaskApi/SecureTaskApi.csproj
 
 # Copy remaining source and publish
-COPY . ./
-RUN dotnet publish SecureTaskApi.csproj \
+COPY SecureTaskApi/ SecureTaskApi/
+RUN dotnet publish SecureTaskApi/SecureTaskApi.csproj \
     -c Release -o /app/publish
+
 # ── Stage 2: Runtime ─────────────────────────────────────────────────────────────
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
 
-# Install EF Core CLI tool for applying migrations at startup
 COPY --from=build /app/publish ./
 
 # Render injects $PORT; ASP.NET Core reads ASPNETCORE_URLS at startup
