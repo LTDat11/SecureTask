@@ -20,10 +20,10 @@ jobs:
           dotnet-version: 8.0.x
 
       - name: Restore dependencies
-        run: dotnet restore
+        run: dotnet restore SecureTaskApi/SecureTaskApi.sln
 
       - name: Build
-        run: dotnet build --no-restore --configuration Release
+        run: dotnet build SecureTaskApi/SecureTaskApi.sln --no-restore --configuration Release
 
   test:
     name: Test
@@ -60,10 +60,10 @@ jobs:
           dotnet-version: 8.0.x
 
       - name: Restore dependencies
-        run: dotnet restore
+        run: dotnet restore SecureTaskApi/SecureTaskApi.sln
 
       - name: Build
-        run: dotnet build --no-restore --configuration Release
+        run: dotnet build SecureTaskApi/SecureTaskApi.sln --no-restore --configuration Release
 
       - name: Run tests
-        run: dotnet test --no-build --configuration Release --verbosity normal --collect:"XPlat Code Coverage"
+        run: dotnet test SecureTaskApi/SecureTaskApi.sln --no-build --configuration Release --verbosity normal --collect:"XPlat Code Coverage"
