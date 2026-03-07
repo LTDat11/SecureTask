@@ -12,6 +12,11 @@ public class User
     [MaxLength(200)]
     public string PasswordHash { get; set; } = default!;
 
+    [MaxLength(20)]
+    public string Role { get; set; } = UserRoles.User;
+
+    public bool IsActive { get; set; } = true;
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public ICollection<TaskItem> Tasks { get; set; } = new List<TaskItem>();

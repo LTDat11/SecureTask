@@ -31,6 +31,13 @@ public class UserRepository : IUserRepository
             .AnyAsync(u => u.UserName == username);
     }
 
+    public async Task<IEnumerable<User>> GetAllAsync()
+    {
+        return await _context.Users
+            .OrderBy(u => u.UserName)
+            .ToListAsync();
+    }
+
     public async Task AddAsync(User user)
     {
         await _context.Users.AddAsync(user);
