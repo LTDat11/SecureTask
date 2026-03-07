@@ -59,6 +59,18 @@ public class AuthServiceTests
     // ── LoginAsync ─────────────────────────────────────────────────────────
 
     [Fact]
+    public async Task RegisterAsync_NewUser_ReturnsUserRoleInResponse()
+    {
+        _userRepoMock.Setup(r => r.ExistsByUsernameAsync("newuser")).ReturnsAsync(false);
+        _userRepoMock.Setup(r => r.AddAsync(It.IsAny<User>())).Returns(Task.CompletedTask);
+        _userRepoMock.Setup(r => r.SaveChangesAsync()).Returns(Task.CompletedTask);
+
+        var result = await _authService.RegisterAsync(new RegisterRequest { Username = "newuser", Password = "pass123" });
+
+        Assert.Equal(UserRoles.User, result.Role);
+    }
+
+    [Fact]
     public async Task LoginAsync_UserNotFound_ThrowsNotFoundException()
     {
         _userRepoMock
@@ -68,6 +80,23 @@ public class AuthServiceTests
         var request = new LoginRequest { UserName = "ghost", Password = "password123" };
 
         await Assert.ThrowsAsync<NotFoundException>(() => _authService.LoginAsync(request));
+    }
+
+    [Fact]
+    public async Task LoginAsync_InactiveUser_ThrowsBadRequestException()
+    {
+        var user = new User
+        {
+            Id = Guid.NewGuid(),
+            UserName = "inactive",
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword("password123"),
+            IsActive = false
+        };
+
+        _userRepoMock.Setup(r => r.GetByUsernameAsync("inactive")).ReturnsAsync(user);
+
+        await Assert.ThrowsAsync<BadRequestException>(() =>
+            _authService.LoginAsync(new LoginRequest { UserName = "inactive", Password = "password123" }));
     }
 
     [Fact]
@@ -112,6 +141,7 @@ public class AuthServiceTests
 
         Assert.Equal("alice", result.UserName);
         Assert.Equal("mocked-jwt-token", result.Token);
+        Assert.Equal(UserRoles.User, result.Role);
     }
 
     // ── ChangePasswordAsync ────────────────────────────────────────────────
