@@ -61,6 +61,22 @@ public class JwtServiceTests : IDisposable
     }
 
     [Fact]
+    public void GenerateToken_ValidUser_TokenContainsRoleClaim()
+    {
+        var jwtService = new JwtService();
+        var user = new User { Id = Guid.NewGuid(), UserName = "alice", Role = UserRoles.Admin };
+
+        var token = jwtService.GenerateToken(user);
+
+        var handler = new JwtSecurityTokenHandler();
+        var parsed = handler.ReadJwtToken(token);
+
+        Assert.True(
+            parsed.Claims.Any(c => c.Value == UserRoles.Admin),
+            "Token should contain the role claim");
+    }
+
+    [Fact]
     public void GenerateToken_JwtKeyNotConfigured_ThrowsException()
     {
         Environment.SetEnvironmentVariable("JWT_KEY", null);

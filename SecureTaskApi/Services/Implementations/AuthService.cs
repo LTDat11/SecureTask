@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using SecureTaskApi.DTOs;
 using SecureTaskApi.Entities;
 using SecureTaskApi.Exceptions;
@@ -30,7 +29,9 @@ public class AuthService : IAuthService
         var user = new User
         {
             UserName = request.Username,
-            PasswordHash = hashedPassword
+            PasswordHash = hashedPassword,
+            Role = UserRoles.User,
+            IsActive = true
         };
 
         await _userRepository.AddAsync(user);
@@ -38,7 +39,8 @@ public class AuthService : IAuthService
 
         return new AuthResponse
         {
-            UserName = user.UserName
+            UserName = user.UserName,
+            Role = user.Role
         };
     }
 
@@ -48,6 +50,9 @@ public class AuthService : IAuthService
 
         if (user == null)
             throw new NotFoundException("User not found");
+
+        if (!user.IsActive)
+            throw new BadRequestException("Account is inactive");
 
         var isValidPassword = BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash);
 
@@ -59,6 +64,7 @@ public class AuthService : IAuthService
         return new AuthResponse
         {
             UserName = user.UserName,
+            Role = user.Role,
             Token = token
         };
     }
