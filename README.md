@@ -65,10 +65,14 @@ SecureTaskApi/
 ### Authentication
 - Password hashing: BCrypt
 - Token generation: HMAC-SHA256
-- Claims: UserId, Username
+- Claims: UserId, Username, Role
 - Token expiration: 1 hour
 
 ### Core Endpoints
+- `GET /api/admin/users`: Get all users
+- `POST /api/admin/users`: Create acount for user or admin
+- `PUT /api/admin/users/{id}/active`: Active or inactive account
+- `PUT /api/admin/users/{id}/password`: Change password for account
 - `POST /api/auth/register`: User registration
 - `POST /api/auth/login`: User login
 - `GET /api/tasks`: Get user's tasks
