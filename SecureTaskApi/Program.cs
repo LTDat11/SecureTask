@@ -74,10 +74,25 @@ builder.Services.AddSwaggerGen(options =>
 // DI
 builder.Services.AddApplicationServices();
 
+// CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAllOrigins", policy =>
+    {
+        policy
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
+});
+
 // Build after configuring services
 var app = builder.Build();
 
 app.UseSerilogRequestLogging();
+
+// Enable CORS
+app.UseCors("AllowAllOrigins");
 
 // Middleware
 if (app.Environment.IsDevelopment())
