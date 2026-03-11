@@ -29,6 +29,7 @@ public class TaskService : ITaskService
             Title = t.Title,
             Description = t.Description,
             Status = t.Status.ToString(),
+            Priority = t.Priority.ToString(),
             Deadline = t.Deadline,
             CreatedAt = t.CreatedAt,
             UpdatedAt = t.UpdatedAt
@@ -43,6 +44,7 @@ public class TaskService : ITaskService
             Title = request.Title,
             Description = request.Description,
             Deadline = request.Deadline?.ToUniversalTime(),
+            Priority = request.Priority,
             UserId = userId
         };
 
@@ -55,6 +57,7 @@ public class TaskService : ITaskService
             Title = task.Title,
             Description = task.Description,
             Status = task.Status.ToString(),
+            Priority = task.Priority.ToString(),
             Deadline = task.Deadline,
             CreatedAt = task.CreatedAt,
             UpdatedAt = task.UpdatedAt
@@ -72,6 +75,7 @@ public class TaskService : ITaskService
         task.Title = request.Title;
         task.Description = request.Description;
         task.Status = request.Status;
+        task.Priority = request.Priority;
         task.Deadline = request.Deadline.ToUniversalTime();
 
         await _taskRepository.SaveChangesAsync();
@@ -127,8 +131,14 @@ public class TaskService : ITaskService
             tasksQuery = tasksQuery.Where(t =>
                 t.Status == query.Status.Value);
 
+        if (query.Priority.HasValue)
+            tasksQuery = tasksQuery.Where(t =>
+                t.Priority == query.Priority.Value);
+
+        var totalItems = await tasksQuery.CountAsync();
+
         // SORT
-        var isDesc = query.SortOrder?.ToLower() == "desc";
+        var isDesc = string.Equals(query.SortOrder, "desc", StringComparison.OrdinalIgnoreCase);
 
         tasksQuery = query.SortBy switch
         {
@@ -136,12 +146,18 @@ public class TaskService : ITaskService
                 isDesc ? tasksQuery.OrderByDescending(t => t.Deadline)
                        : tasksQuery.OrderBy(t => t.Deadline),
 
+            TaskSortBy.Status =>
+                isDesc ? tasksQuery.OrderByDescending(t => t.Status)
+                : tasksQuery.OrderBy(t => t.Status),
+
+            TaskSortBy.Priority =>
+                isDesc ? tasksQuery.OrderByDescending(t => t.Priority)
+                       : tasksQuery.OrderBy(t => t.Priority),
+
             _ =>
                 isDesc ? tasksQuery.OrderByDescending(t => t.Title)
                        : tasksQuery.OrderBy(t => t.Title)
         };
-
-        var totalItems = await tasksQuery.CountAsync();
 
         var items = await tasksQuery
             .Skip((query.Page - 1) * query.PageSize)
