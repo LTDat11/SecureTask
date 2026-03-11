@@ -13,4 +13,6 @@ public class UpdateTaskRequest
     public DateTime Deadline { get; set; }
 
     public Entities.TaskStatus Status { get; set; }
+
+    public Entities.PriorityStatus Priority  { get; set; }
 }

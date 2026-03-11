@@ -14,6 +14,8 @@ public class TaskItem
 
     public TaskStatus Status { get; set; } = default!;
 
+    public PriorityStatus Priority { get; set; } = default!;
+
     public DateTime? Deadline { get; set; }
 
     public Guid UserId { get; set; }

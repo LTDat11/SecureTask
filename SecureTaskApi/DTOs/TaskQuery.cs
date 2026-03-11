@@ -9,6 +9,8 @@ public class TaskQuery
 
     public Entities.TaskStatus? Status { get; set; }
 
+    public Entities.PriorityStatus? Priority { get; set; }
+
     public DateTime? Deadline { get; set; }
 
     public TaskSortBy? SortBy { get; set; }
