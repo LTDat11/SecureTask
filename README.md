@@ -89,17 +89,26 @@ openssl rand -base64 32
 ```
 Create `.env` file (do not commit):
 ```
+# JWT Configuration
 JWT_KEY=YOUR_GENERATED_SECRET
 JWT_ISSUER=SecureTaskApi
 JWT_AUDIENCE=SecureTaskApiUser
+
+# Database Configuration
 DATABASE_URL=Host=db;Port=5432;Database=securetaskdb;Username=postgres;Password=YourPassWord
-ASPNETCORE_ENVIRONMENT=Development
+
+# Other environment variables
+ASPNETCORE_ENVIRONMENT=Development (or Production)
+
+POSTGRES_PASSWORD=YourPassWord
+POSTGRES_DB=securetaskdb
+POSTGRES_USER=postgres
 ```
 
 #### Database Migration
 ```bash
 dotnet ef migrations add InitialCreate
-dotnet ef database update
+DATABASE_URL="Host=localhost;Port=5432;Database=securetaskdb;Username=postgres;Password=YourPassWord" dotnet ef database update
 ```
 
 #### Run with Docker
