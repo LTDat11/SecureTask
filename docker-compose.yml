@@ -1,0 +1,52 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: SecureTaskApi/Dockerfile
+    container_name: securetask-api
+    ports:
+      - "5050:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      DATABASE_URL: Host=db;Port=5432;Database=securetaskdb;Username=postgres;Password=123456
+      JWT_KEY: ${JWT_KEY:-your-super-secret-key-change-this-in-production}
+      JWT_ISSUER: ${JWT_ISSUER:-SecureTaskApi}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-SecureTaskApiUser}
+    depends_on:
+      - db
+    networks:
+      - securetask-network
+
+  web:
+    build:
+      context: .
+      dockerfile: SecureTaskWeb/Dockerfile
+    container_name: securetask-web
+    ports:
+      - "5051:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+    depends_on:
+      - api
+    networks:
+      - securetask-network
+
+  db:
+    image: postgres:16
+    container_name: securetask-postgres
+    environment:
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: securetaskdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - securetask-network
+
+volumes:
+  postgres_data:
+
+networks:
+  securetask-network:
+    driver: bridge
