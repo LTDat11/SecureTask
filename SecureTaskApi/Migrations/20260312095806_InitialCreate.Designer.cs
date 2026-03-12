@@ -12,7 +12,7 @@ using SecureTaskApi.Data;
 namespace SecureTaskApi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260311033028_InitialCreate")]
+    [Migration("20260312095806_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
