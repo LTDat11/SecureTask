@@ -37,10 +37,15 @@ public class AuthService : IAuthService
         await _userRepository.AddAsync(user);
         await _userRepository.SaveChangesAsync();
 
+        var getUser = await _userRepository.GetByUsernameAsync(user.UserName);
+
+        var token = _jwtService.GenerateToken(getUser!);
+
         return new AuthResponse
         {
             UserName = user.UserName,
-            Role = user.Role
+            Role = user.Role,
+            Token = token
         };
     }
 
