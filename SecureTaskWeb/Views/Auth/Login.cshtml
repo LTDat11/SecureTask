@@ -299,13 +299,13 @@
 
             const data = await response.json();
 
-            if (response.ok) {
+            if (response.ok && data.success) {
                 showToast('Đăng nhập thành công!', 'success');
                 setTimeout(() => {
                     window.location.href = '@Url.Action("Index", "Home")';
                 }, 500);
             } else {
-                errorMsg.textContent = data.error || 'Đăng nhập thất bại';
+                errorMsg.textContent = data.error || data.message || 'Đăng nhập thất bại';
                 errorDiv.classList.remove('hidden');
             }
         } catch (error) {
@@ -351,15 +351,18 @@
 
             const data = await response.json();
 
-            if (response.ok) {
+            if (response.ok && data.success) {
                 successDiv.classList.remove('hidden');
                 document.getElementById('registerForm').reset();
-                // Switch to login tab after 2 seconds
+
+                showToast('Chào mừng bạn mới! Đang vào hệ thống...', 'success');
+                
                 setTimeout(() => {
-                    switchTab('login');
-                }, 2000);
+                    window.location.href = '@Url.Action("Index", "Auth")';
+                }, 1500);
+                
             } else {
-                errorMsg.textContent = data.error || 'Đăng ký thất bại';
+                errorMsg.textContent = data.error || data.message || 'Đăng ký thất bại';
                 errorDiv.classList.remove('hidden');
             }
         } catch (error) {

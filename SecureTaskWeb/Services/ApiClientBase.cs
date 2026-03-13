@@ -1,4 +1,6 @@
 using System.Net.Http.Json;
+using SecureTaskWeb.Middlewares;
+using SecureTaskWeb.Models;
 using SecureTaskWeb.Services.Interfaces;
 
 namespace SecureTaskWeb.Services;
@@ -10,17 +12,40 @@ public class ApiClientBase : IApiClient
 {
     private readonly HttpClient _httpClient;
     private readonly ILogger<ApiClientBase> _logger;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public ApiClientBase(HttpClient httpClient, ILogger<ApiClientBase> logger)
+    public ApiClientBase(HttpClient httpClient, ILogger<ApiClientBase> logger, IHttpContextAccessor httpContextAccessor)
     {
         _httpClient = httpClient;
         _logger = logger;
+        _httpContextAccessor = httpContextAccessor;
+    }
+
+    /// <summary>
+    /// Add JWT token to request headers from user session
+    /// </summary>
+    private void AddAuthorizationHeader()
+    {
+        try
+        {
+            var userSession = _httpContextAccessor.HttpContext?.Session.Get<UserSession>("UserSession");
+            if (userSession?.Token != null)
+            {
+                _httpClient.DefaultRequestHeaders.Authorization = 
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", userSession.Token);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to add authorization header");
+        }
     }
 
     public async Task<ApiResult<T>> PostAsync<T>(string endpoint, object? payload = null)
     {
         try
         {
+            AddAuthorizationHeader();
             _logger.LogInformation("POST request to {Endpoint}", endpoint);
 
             var response = await _httpClient.PostAsJsonAsync(endpoint, payload);
@@ -43,6 +68,7 @@ public class ApiClientBase : IApiClient
     {
         try
         {
+            AddAuthorizationHeader();
             _logger.LogInformation("GET request to {Endpoint}", endpoint);
 
             var response = await _httpClient.GetAsync(endpoint);
@@ -65,6 +91,7 @@ public class ApiClientBase : IApiClient
     {
         try
         {
+            AddAuthorizationHeader();
             _logger.LogInformation("PUT request to {Endpoint}", endpoint);
 
             var response = await _httpClient.PutAsJsonAsync(endpoint, payload);
@@ -87,6 +114,7 @@ public class ApiClientBase : IApiClient
     {
         try
         {
+            AddAuthorizationHeader();
             _logger.LogInformation("DELETE request to {Endpoint}", endpoint);
 
             var response = await _httpClient.DeleteAsync(endpoint);

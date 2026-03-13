@@ -34,6 +34,7 @@ public static class DependencyInjectionExtensions
     public static IServiceCollection AddApplicationMvc(this IServiceCollection services)
     {
         services.AddControllersWithViews();
+        services.AddHttpContextAccessor();
         services.AddSession(options =>
         {
             options.IdleTimeout = TimeSpan.FromMinutes(30);
