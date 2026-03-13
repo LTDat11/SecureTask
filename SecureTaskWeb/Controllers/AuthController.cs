@@ -24,7 +24,7 @@ public class AuthController : Controller
     }
 
     /// <summary>
-    /// Displays the login/register page or dashboard if user is logged in
+    /// Displays the login/register page or redirects to dashboard if user is logged in
     /// </summary>
     public IActionResult Index()
     {
@@ -33,8 +33,8 @@ public class AuthController : Controller
 
         if (userSession != null)
         {
-            // User is logged in, show dashboard
-            return View("~/Views/Home/Index.cshtml");
+            // User is logged in, redirect to home/dashboard
+            return RedirectToAction("Index", "Home");
         }
 
         // User is not logged in, show login page
