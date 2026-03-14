@@ -31,7 +31,7 @@ public class ApiClientBase : IApiClient
             var userSession = _httpContextAccessor.HttpContext?.Session.Get<UserSession>("UserSession");
             if (userSession?.Token != null)
             {
-                _httpClient.DefaultRequestHeaders.Authorization = 
+                _httpClient.DefaultRequestHeaders.Authorization =
                     new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", userSession.Token);
             }
         }
@@ -139,7 +139,12 @@ public class ApiClientBase : IApiClient
         {
             if (response.IsSuccessStatusCode)
             {
-                var data = await response.Content.ReadFromJsonAsync<T>();
+                var options = new System.Text.Json.JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase,
+                    PropertyNameCaseInsensitive = true
+                };
+                var data = await response.Content.ReadFromJsonAsync<T>(options);
                 _logger.LogInformation("{Method} {Endpoint} succeeded", method, endpoint);
 
                 return new ApiResult<T>
@@ -166,7 +171,12 @@ public class ApiClientBase : IApiClient
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error handling response from {Method} {Endpoint}", method, endpoint);
-            throw;
+            return new ApiResult<T>
+            {
+                Success = false,
+                Error = $"Error deserializing response: {ex.Message}",
+                StatusCode = (int)response.StatusCode
+            };
         }
     }
 }

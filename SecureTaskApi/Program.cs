@@ -11,6 +11,8 @@ builder.AddCustomLogging();
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
+    // Use camelCase for JSON property names
+    options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
     // Serialize enums as strings in JSON responses
     options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
 });

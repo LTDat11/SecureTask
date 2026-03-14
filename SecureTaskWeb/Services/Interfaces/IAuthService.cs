@@ -16,5 +16,5 @@ public interface IAuthService
     /// <summary>
     /// Registers a new user
     /// </summary>
-    Task<ApiResult<object>> RegisterAsync(RegisterRequest request);
+    Task<ApiResult<LoginResponse>> RegisterAsync(RegisterRequest request);
 }

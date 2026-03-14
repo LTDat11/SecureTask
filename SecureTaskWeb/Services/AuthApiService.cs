@@ -37,11 +37,11 @@ public class AuthApiService : IAuthService
         return result;
     }
 
-    public async Task<ApiResult<object>> RegisterAsync(RegisterRequest request)
+    public async Task<ApiResult<LoginResponse>> RegisterAsync(RegisterRequest request)
     {
         _logger.LogInformation("Attempting registration for user: {Username}", request.Username);
 
-        var result = await _apiClient.PostAsync<object>(ApiEndpoints.RegisterEndpoint, request);
+        var result = await _apiClient.PostAsync<LoginResponse>(ApiEndpoints.RegisterEndpoint, request);
 
         if (!result.Success)
         {

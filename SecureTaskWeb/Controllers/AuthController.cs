@@ -109,7 +109,29 @@ public class AuthController : Controller
 
         _logger.LogInformation("User {Username} registered successfully", model.Username);
 
-        return Ok(new { success = true, message = "Đăng ký thành công. Vui lòng đăng nhập!" });
+        // Automatically log in the user after successful registration using the token from registration response
+        if (result.Data != null)
+        {
+            // Get token expiry time
+            var expiryTime = JwtHelper.GetTokenExpiry(result.Data.Token ?? string.Empty);
+
+            // Store user session
+            var userSession = new UserSession
+            {
+                Username = result.Data.Username ?? model.Username,
+                Token = result.Data.Token ?? string.Empty,
+                TokenExpiry = expiryTime ?? DateTime.UtcNow.AddDays(7),
+                Role = result.Data.Role ?? AppConstants.DefaultRole,
+                LoginTime = DateTime.UtcNow
+            };
+
+            HttpContext.Session.Set("UserSession", userSession);
+
+            _logger.LogInformation("User {Username} logged in automatically after registration. Token expires at {Expiry}",
+                model.Username, userSession.TokenExpiry);
+        }
+
+        return Ok(new { success = true, message = "Đăng ký thành công" });
     }
 
     /// <summary>
@@ -132,3 +154,4 @@ public class AuthController : Controller
         return RedirectToAction("Index");
     }
 }
+
