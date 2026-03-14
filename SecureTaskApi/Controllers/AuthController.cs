@@ -31,7 +31,7 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Register(RegisterRequest request)
     {
         var result = await _authService.RegisterAsync(request);
-        return Ok(ApiResponse<AuthResponse>.Ok(result));
+        return Ok(result);
     }
 
     [EnableRateLimiting("LoginPolicy")] // Apply rate limiting to the login endpoint
@@ -39,7 +39,7 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Login(LoginRequest request)
     {
         var result = await _authService.LoginAsync(request);
-        return Ok(ApiResponse<AuthResponse>.Ok(result));
+        return Ok(result);
     }
 
     [Authorize]
